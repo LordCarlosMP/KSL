@@ -1,0 +1,5 @@
+name: KSL
+main: org.ksl.plugin.KslMain
+authors: [LordCarlosMP]
+description: KSL KslPlugin
+version: 1.0
