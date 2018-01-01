@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "FunctionName")
 
 package org.ksl.useful.extensions
 
@@ -12,14 +12,22 @@ import org.bukkit.inventory.ItemStack
  * Created by LordCarlosMP on 28/06/2017.
  */
 
-fun ItemStack.setDisplayNameAndLore(name: String, vararg lore: String) {
+fun ItemStack.setDisplayNameAndLore(name: String, vararg lore: String) = setDisplayNameAndLore(name, lore.toList())
+
+fun ItemStack.setDisplayNameAndLore(name: String, lore: List<String>) {
 	val im = itemMeta
 	im.displayName = name
-	im.lore = lore.asList()
+	im.lore = lore
 	itemMeta = im
 }
 
-var ItemStack.displayName: String
+var ItemStack.material: Material
+	get() = type
+	set(value) {
+		type = value
+	}
+
+var ItemStack.name: String
 	get() = itemMeta.displayName
 	set(newName) {
 		val im = itemMeta
@@ -103,10 +111,25 @@ fun ItemStack.addAllItemFlags() {
 	addItemFlags(*ItemFlag.values())
 }
 
-fun ItemStack(material: Material, amount: Int = 1, data: Int) = ItemStack(material, amount, data.toShort())
+/**
+ * If you are using named arguments, go with this ones
+ */
+fun Material.itemStack(amount: Int = 1, data: Int = 0, name: String? = null, lore: List<String>? = null) = ItemStack(this, amount, data, name, lore)
 
-fun ItemStack(material: Material, amount: Int = 1, data: Int = 0, name: String, vararg lore: String)
-		= ItemStack(material, amount, data.toShort()).apply { setDisplayNameAndLore(name, *lore) }
+fun ItemStack(material: Material, amount: Int = 1, data: Int = 0, name: String? = null, lore: List<String>? = null)
+		= ItemStack(material, amount, data.toShort()).apply {
+	name?.let { this@apply.name = it }
+	lore?.let { this@apply.lore = it }
+}
 
-fun ItemStack(material: Material, name: String, vararg lore: String) = ItemStack(material, 1, 0, name, *lore)
+/**
+ * These methods avoid the necessity of using named arguments for "most" typical cases
+ * which are not included in Bukkit's ItemStack contructors, remember that when the
+ * data is 0, you can use Material.ItemStack(itemStack.()->Unit) method.
+ */
+fun ItemStack(material: Material, amount: Int, data: Int) = ItemStack(material, amount, data.toShort())
 
+fun ItemStack(material: Material, name: String, vararg lore: String) = material.itemStack(
+		name = name,
+		lore = lore.toList()
+)

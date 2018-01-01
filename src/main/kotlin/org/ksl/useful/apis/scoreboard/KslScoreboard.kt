@@ -81,8 +81,8 @@ import org.bukkit.scoreboard.Team
 //			rows.clear()
 //		}
 //
-//		fun setDisplayName(title: String) {
-//			objective.displayName = title
+//		fun setName(title: String) {
+//			objective.name = title
 //		}
 //
 //	}
@@ -126,9 +126,9 @@ import org.bukkit.scoreboard.Team
 //		fun size() = rows.size
 //
 //		var displayname: String
-//			get() = objective.displayName
+//			get() = objective.name
 //			set(newName) {
-//				objective.displayName = newName
+//				objective.name = newName
 //			}
 //
 ////		fun editRow(oldRow: String, newRow: String) {
@@ -174,8 +174,8 @@ import org.bukkit.scoreboard.Team
 //			rows.clear()
 //		}
 //
-//		fun setDisplayName(title: String) {
-//			objective.displayName = title
+//		fun setName(title: String) {
+//			objective.name = title
 //		}
 //	}
 //
