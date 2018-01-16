@@ -2,11 +2,13 @@
 
 package org.ksl.useful.extensions
 
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.enchantments.EnchantmentTarget.ALL
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.ksl.plugin.KslPlugin
 
 /**
  * Created by LordCarlosMP on 28/06/2017.
@@ -19,12 +21,15 @@ fun ItemStack.setDisplayNameAndLore(name: String, lore: List<String>) {
 	im.displayName = name
 	im.lore = lore
 	itemMeta = im
+	Bukkit.getScheduler().runTask(KslPlugin) {
+
+	}
 }
 
 var ItemStack.material: Material
 	get() = type
-	set(value) {
-		type = value
+	set(nv) {
+		type = nv
 	}
 
 var ItemStack.name: String
@@ -84,9 +89,8 @@ fun ItemStack.addEnchantAura() {
 }
 
 fun ItemStack.addItemFlags(vararg flags: ItemFlag) {
-	val meta = itemMeta
-	meta.addItemFlags(*flags)
-	itemMeta = meta
+	itemMeta.addItemFlags(*flags)
+	itemMeta = itemMeta
 }
 
 val ItemStack.itemFlags: Set<ItemFlag> get() = itemMeta.itemFlags

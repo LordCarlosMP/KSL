@@ -42,10 +42,11 @@ inline fun inEachOnlinePlayer(f: Player.() -> Unit) {
 fun CommandSender.execute(cmd: String) = Bukkit.dispatchCommand(this, cmd)
 fun executeCommand(cmd: String) = cmd.runCommandAsConsole()
 
+
+//TODO: val?
 fun isPrimaryThread(): Boolean = Bukkit.isPrimaryThread()
 
-inline
-fun Iterable<UUID>.inEachOnlinePlayer(f: Player.() -> Unit) {
+inline fun Iterable<UUID>.inEachOnlinePlayer(f: Player.() -> Unit) {
 	for (id in this) id.playerWithThatUUID()?.f()
 }
 

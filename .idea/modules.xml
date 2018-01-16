@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/KSL.iml" filepath="$PROJECT_DIR$/.idea/modules/KSL.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/KSL_main.iml" filepath="$PROJECT_DIR$/.idea/modules/KSL_main.iml" group="KSL" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/KSL_test.iml" filepath="$PROJECT_DIR$/.idea/modules/KSL_test.iml" group="KSL" />
     </modules>
   </component>
 </project>
