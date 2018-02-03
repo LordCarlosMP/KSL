@@ -1,5 +1,35 @@
+group 'org.ksl'
+version '1.0-SNAPSHOT'
+apply plugin: 'java'
+apply plugin: 'kotlin'
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        url "https://oss.sonatype.org/content/groups/public/"
+    }
+}
+configurations {
+    includeInJar
+    compile.extendsFrom(includeInJar)
+}
+dependencies {
+    compile group: 'org.spigotmc', name: 'spigot-api', version: '1.8.8-R0.1-SNAPSHOT'
+    includeInJar "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    includeInJar "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    includeInJar group: 'com.zaxxer', name: 'HikariCP', version: '2.6.3'
+}
+jar {
+    from configurations.includeInJar.collect { it.isDirectory() ? it : zipTree(it) }
+    baseName = "BetaKsl"
+}
 buildscript {
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.2.21'
 
     repositories {
         mavenCentral()
@@ -12,34 +42,30 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
-
-group 'org.ksl'
-version '1.0-SNAPSHOT'
-apply plugin: 'java'
-apply plugin: 'kotlin'
-
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-    jcenter()
-    maven {
-        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
-    maven {
-        url "https://oss.sonatype.org/content/groups/public/"
-    }
-
-}
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmToarget = "1.8"
 }
 
 
-dependencies {
-    compile 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.6.3'
+task sendToJars(type: Copy) {
+    dependsOn build
+    from 'build/libs/' + jar.baseName + '-' + jar.version + '.jar'
+    into 'C:/Space/Jars'
+}
+build.finalizedBy sendToJars
+
+task copyToMineTest(type: Copy) {
+    dependsOn build
+    from 'build/libs/' + jar.baseName + '-' + jar.version + '.jar'
+    into 'C:/Users/LordCarlosMP/Desktop/MineTest/plugins'
+}
+
+task startMineTest(type: Exec) {
+    commandLine 'C:/Users/LordCarlosMP/Desktop/MineTest/gradlestart.bat'
+}
+
+task compileAndStartMineTest {
+    dependsOn build
+    dependsOn copyToMineTest
+    dependsOn startMineTest
 }

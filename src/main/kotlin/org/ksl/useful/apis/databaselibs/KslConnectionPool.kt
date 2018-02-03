@@ -2,11 +2,17 @@
 
 package org.ksl.useful.apis.databaselibs
 
-import com.zaxxer.hikari.*
-import org.bukkit.plugin.java.*
-import org.intellij.lang.annotations.*
-import org.ksl.useful.extensions.*
-import java.sql.*
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import org.bukkit.plugin.java.JavaPlugin
+import org.intellij.lang.annotations.Language
+import org.ksl.useful.extensions.async
+import org.ksl.useful.extensions.printStackTrace
+import org.ksl.useful.extensions.sync
+import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.SQLException
 
 /**
  * Created by LordCarlosMP on 27/04/2017.
@@ -17,22 +23,28 @@ import java.sql.*
  * Avoiding common mistakes such as memory leacks or Feezing Main Thread
  */
 
-class KslConnectionPool(val connectionPool: HikariDataSource, private val plugin: JavaPlugin) {
+class KslConnectionPool(private val plugin: JavaPlugin, val connectionPool: HikariDataSource) {
 
 	//For custom HikaryConfig
-	constructor(plugin: JavaPlugin, config: HikariConfig) : this(HikariDataSource(config), plugin)
+	constructor(plugin: JavaPlugin, config: HikariConfig) : this(plugin, HikariDataSource(config))
 
 	//Default constructor for common connection pools
-	constructor(plugin: JavaPlugin, jdbcUrl: String, user: String, pass: String) : this(plugin, HikariDataSource({
-		val config = HikariConfig()
-		config.jdbcUrl = jdbcUrl
-		config.username = user
-		config.password = pass
-		config.addDataSourceProperty("cachePrepStmts", "true")
-		config.addDataSourceProperty("prepStmtCacheSize", "250")
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
-		config
-	}()))
+	constructor(plugin: JavaPlugin, jdbcUrl: String, user: String, pass: String) : this(plugin, {
+		var ds: HikariDataSource?
+		try {
+			val config = HikariConfig()
+			config.jdbcUrl = jdbcUrl
+			config.username = user
+			config.password = pass
+			config.addDataSourceProperty("cachePrepStmts", "true")
+			config.addDataSourceProperty("prepStmtCacheSize", "250")
+			config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
+			ds = HikariDataSource(config)
+		} catch (ex: Exception) {
+			throw SQLException("Could not connect to the database", ex)
+		}
+		ds!!
+	}())
 
 	/**
 	 * @Description This method won´t block the thread who called it, it will make a new one and when the query is done, it will call @Param f
@@ -57,7 +69,7 @@ class KslConnectionPool(val connectionPool: HikariDataSource, private val plugin
 					try {
 						f(rs!!)
 					} catch (ex: SQLException) {
-						plugin.printStackTrace(ex, "§cAn exception was thrown in the NoRetCall.invoke(ResultSet) method")
+						plugin.printStackTrace(ex, "§cAn exception was thrown in f function")
 					} finally {
 						plugin.async { close() }
 					}
@@ -92,7 +104,7 @@ class KslConnectionPool(val connectionPool: HikariDataSource, private val plugin
 	fun update(@Language("SQL") sql: String, vararg replacements: Any, f: () -> Unit = {}) {
 		plugin.async {
 			updateInThisThread(sql, *replacements)
-			if (f != {}) plugin.sync(f) //we dont need to call the scheduler if f = {}
+			if (f != {}) plugin.sync(f) //we dont need to call the scheduler if f == {}
 		}
 	}
 
@@ -106,8 +118,6 @@ class KslConnectionPool(val connectionPool: HikariDataSource, private val plugin
 	fun updateInThisThread(@Language("SQL") sql: String, vararg replacements: Any) {
 		connectionPool.connection.use { conn -> prepare(conn, sql, *replacements).use { pst -> pst.executeUpdate() } }
 	}
-
-
 
 	fun prepare(conn: Connection, sql: String, vararg replacements: Any): PreparedStatement {
 		val pst = conn.prepareStatement(sql)
